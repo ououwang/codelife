@@ -1,0 +1,4 @@
+1、top -u usrname ，查看问题是不是这个
+
+#批量杀进程
+kill -9 `ps aux | grep vncconfig | grep cpyan | awk '{print $2}'`
