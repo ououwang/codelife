@@ -2,3 +2,7 @@
 
 #批量杀进程
 kill -9 `ps aux | grep vncconfig | grep cpyan | awk '{print $2}'`
+
+
+jobs命令列出当前任务
+fg 任务号放前台，bg 任务号放后台。
