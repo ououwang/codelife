@@ -1,0 +1,49 @@
+centos7 离线安装神器yumdownloader
+
+作为一个运维人员，有时候公司的服务器外网权限控制的很死，安装系统离线源之外的工具，会感到非常头疼，因为离线rpm安装的话，有很多依赖需要下载安装。
+今天以离线安装ansible为例，与大家分享下离线安装centos7一些开源工具的方法。
+
+系统：centos7
+服务器：一台能联网的、一台离线的。系统版本相同即可
+工具：yumdownloader
+
+在能联网的服务器上
+1、安装yumdownloader
+yumdownloader是什么：
+yumdownloader is a program for downloading RPMs from Yum repositories
+
+安装：
+yum install yum-utils -y
+
+2、获取ansible安装包及依赖
+mkdir /tmp/ansible
+yumdownloader --resolve --destdir /tmp/ansible ansible
+yumdownloader --resolve --destdir /tmp/ansible createrepo
+tar zcf ansible.tar.gz /tmp/ansible
+注意/tmp/ansible ansible之间是有空格的哦
+
+3、上传
+将ansible.tar.gz上传到离线服务器上/tmp目录下
+
+在离线服务器上
+1、解压压缩包
+tar zxf /tmp/ansible.tar.gz
+
+2、制作离线源
+cd /tmp/ansible
+rpm -ivh deltarpm-3.6-3.el7.x86_64.rpm
+rpm -ivh python-deltarpm-3.6-3.el7.x86_64.rpm
+rpm -ivh createrepo-0.9.9-28.el7.noarch.rpm
+cd /tmp
+createrepo ansible
+
+3、编辑yum文件
+vim /etc/yum.repos.d/ansible.repo
+
+[ansible]
+name=ansible
+baseurl=file:///tmp/ansible
+gpgcheck=0
+enabled=1
+4、安装ansible
+yum install ansible -y
