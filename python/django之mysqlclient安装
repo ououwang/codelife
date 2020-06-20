@@ -1,0 +1,20 @@
+
+如果运行环境中没有安装mysqlclient，在迁移数据库时会发生错误
+
+一、在windows下安装：
+
+　　·如果直接使用 pip install mysqlclient 会提示安装失败（版本不对或者找不到包）
+
+　　·正确安装步骤：
+
+　　　　1. 下载对应版本的 mysqlclient 安装文件：https://www.lfd.uci.edu/~gohlke/pythonlibs/#mysqlclient
+
+　　　　2. 进入 mysqlclient 文件目录，使用 pip install mysqlclient文件名 进行安装
+
+ 
+
+二、在linux(centos)下安装mysqlclient步骤：
+
+　　1. 首先安装 mysql-devel： yum install mysql-devel
+
+　　2. 使用 pip install mysqlclient 直接进行安装（已经安装好python环境）
