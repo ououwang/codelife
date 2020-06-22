@@ -1,0 +1,197 @@
+linux配置node环境
+虚拟机：VMware® Workstation 12 Pro
+Linux：CentOS-6.9 x64
+
+查看自己linux装的多少位系统
+
+[elastic@localhost /]$ getconf LONG_BIT
+64
+1
+2
+node官网：https://nodejs.org/en/download/
+
+
+
+复制下载链接，使用wget命令下载
+
+若下载慢，这里提供两个版本：（推荐低版本，解压即用）
+node-v12.13.0-linux-x64：https://pan.baidu.com/s/1TPoAbM8_uKmI8PIEphPBqQ
+提取码：wj10
+node-v10.0.0-linux-x64：https://pan.baidu.com/s/1-msawzqUWVdisOplCONhVA
+提取码：yw3z
+
+wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-linux-x64.tar.xz
+xz -d node-v12.13.0-linux-x64.tar.xz					#第一步解压
+tar -xvf node-v12.13.0-linux-x64.tar					#第二步解压
+1
+2
+3
+添加环境变量
+
+vim  /etc/profile
+1
+最下面添加顺序不要变：
+
+NODE_HOME=/java/nodejs         							#node的解压目录 
+PATH=$PATH:$NODE_HOME/bin
+NODE_PATH=$NODE_HOME/lib/node_modules
+export PATH NODE_HOME NODE_PATH
+1
+2
+3
+4
+NODE_PATH 变量的作用参考：https://www.cnblogs.com/zxktxj/p/5051831.html
+修改完执行以下命令是变量生效
+
+source /etc/profile
+1
+查看环境变量
+
+echo $PATH
+1
+设置软连接，使得node在任何地方都能使用
+
+ln -s /java/nodejs/bin/node  /usr/local/bin/node
+ln -s /java/nodejs/bin/npm  /usr/local/bin/npm
+1
+2
+linux软连接 参考：https://blog.csdn.net/m290345792/article/details/78518360
+运行 node -v 测试一下
+
+出现版本号则说明部署成功了！
+
+我这里由于下载的node版本太高，本地的Linux装的系统太低
+错误整理：
+
+
+查看当前当前使用的版本库
+
+ strings /usr/lib64/libstdc++.so.6|grep GLIBCXX
+1
+
+
+GLIBCXX 版本最高是13，而上面的错误信息中的14 15 18 没有，需要升级一下
+
+wget http://ftp.gnu.org/gnu/gcc/gcc-7.1.0/gcc-7.1.0.tar.bz2			#下载gcc-7.1
+tar -jxvf gcc-7.1.0.tar.bz2											#解压
+1
+2
+下载慢的话，网盘链接：
+链接：https://pan.baidu.com/s/1HzpGCKDi2AsVfDsfdyoFhg
+提取码：0omc
+解压后进入解压目录：
+
+cd gcc-7.1.0
+./contrib/download_prerequisites    		 # 下载依赖库
+mkdir gcc-temp                       		 # 建立编译输出目录
+./configure --enable-checking=release --enable-languages=c,c++ --disable-multilib   # 生成makefile文件
+make -j4                           			 # 编译（j为核心数，速度会更快,这步极为耗时）
+sudo make install                  			 # 安装
+1
+2
+3
+4
+5
+6
+执行make j4 的时候最后可能会 报错：
+
+make[2]: Leaving directory `/usr/local/src/gcc-7.1.0' 
+make[1]: *** [stage1-bubble]
+ Error 2 make[1]:
+1
+2
+3
+执行命令：
+
+yum install -y glibc-headers gcc-c++
+1
+再执行make j4，最后没有Error则继续执行下一步 安装命令(sudo make install)
+
+至此安装成功，一般程序安装在 /usr/local/bin/ 目录下
+替换当前gcc4.7版本 ：
+
+update-alternatives --install /usr/bin/gcc gcc /usr/local/bin/x86_64-pc-linux-gnu-gcc 40
+
+                              # 倒数第三个是名字，倒数第二个参数为新GCC路径，最后一个参数40为优先级
+
+mv /usr/bin/gcc /usr/bin/gcc.bak           # 将原本的gcc重命名(删除亦可)
+
+ln -s /usr/local/bin/x86_64-pc-linux-gnu-gcc /usr/bin/gcc            # 软连接使用gcc7.1版本
+1
+2
+3
+4
+5
+6
+7
+当前版本位于/usr/bin/gcc，执行以下命令
+执行命令 gcc -v
+‘版本显示 7.1.0 升级成功！
+然后：用最新的libstdc++.so.6替换旧的/usr/lib64/libstdc++.so.6：
+
+strings /usr/lib64/libstdc++.so.6|grep GLIBCXX			#查看版本
+1
+此时应该还是显示的老版本，继续
+
+cd /usr/lib64       								#进入老版本
+rm -rf libstdc++.so.6								#移除老的
+cp /usr/local/lib64/libstdc++.so.6  ./              #将新版本复制到当前目录
+1
+2
+3
+为什么复制到当前目录？
+发现这个里面正是最新版本的动态库，可见，在升级gcc时，gcc编译会在gcc-temp目录中生成libstdc++.so.6，升级完毕，默认只会在/usr/local/lib64目录下包含最新的libstdc++.so.6动态库，而不会更新/usr/lib64目录下的libstdc++.so.6。而执行程序时，程序会优先从/usr/lib64目录下去寻找libstdc++.so.6，由于老版本的gcc在/usr/lib64中有一个旧版本的动态库libstdc++.so.6，导致程序以为自己找到了正确的动态库，实际上找到的却不是最新的
+
+查看版本
+
+strings /usr/lib64/libstdc++.so.6|grep GLIBCXX
+1
+
+
+GLIBCXX最高版本23 ，满足要求了。
+至此：gcc版本升级完成，再运行node -v
+
+
+还有三个问题，然后升级GLIBC版本，最高要求是17，我选择了17版本的，可以选更高点的
+下载慢可选择：
+链接 glibc-2.17 版本：https://pan.baidu.com/s/18XGXAP-uCW5m7rdRN5130g
+提取码：e4zg
+链接 glibc-2.26 版本：https://pan.baidu.com/s/1iAeg3CRIDsTOZ-D7kqSbhA
+提取码：vdpj
+
+逐步执行注意版本号：
+
+wget http://ftp.gnu.org/gnu/glibc/glibc-2.17.tar.gz
+tar -xvf  glibc-2.17.tar.gz 
+mkdir glibc-build-2.17
+cd glibc-build-2.17
+../glibc-2.17/configure  --prefix=/usr --disable-profile --enable-add-ons --with-headers=/usr/include --with-binutils=/usr/bin
+make && make install
+1
+2
+3
+4
+5
+6
+strings /lib64/libc.so.6|grep GLIBC
+1
+
+GLIBC版本最高已达17，满足要求了。
+
+运行node-v测试
+
+
+
+看到版本号，部署完成！
+
+Java环境和node环境一块配置在, /etc/profile 里面
+
+注意NODE_HOME要配置在PATH上面，要不然PATH找不到变量NODE_HOME，使用node命令的时候就会报未找到命令
+
+JAVA_HOME=/java/jdk
+CLASSPATH=$JAVA_HOME/lib/
+NODE_HOME=/java/nodejs
+PATH=$PATH:$JAVA_HOME/bin:$NODE_HOME/bin
+NODE_PATH=$NODE_HOME/lib/node_modules
+
+export PATH JAVA_HOME CLASSPATH NODE_HOME NODE_PATH
