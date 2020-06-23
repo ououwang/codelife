@@ -1,0 +1,29 @@
+django根据已有数据库表生成model类
+创建一个Django项目
+
+django-admin startproject ‘xxxx‘
+修改setting文件，在setting里面设置你要连接的数据库类型和连接名称，地址之类，和创建新项目的时候一致
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sqlexam',
+        'USER': 'root',
+        'PASSWORD': 'root123456',
+        'HOST': '127.0.0.1',
+        'PORT': 3306
+    }
+}
+接下来就可以根据数据库数据生成对应的models模型文件
+
+1、生成模型文件
+
+python3 manage.py inspectdb
+2、将模型文件导入到app当中
+
+创建app
+
+python3 manage.py startapp 'app名字'
+将模型导入创建的app中
+
+python3 manage.py inspectdb > app/models.py
