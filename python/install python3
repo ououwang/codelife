@@ -16,16 +16,16 @@ yum install wget
 这个包是为了下载python源码用的
 
 4. 下载源码包
-wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+wget https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz
 我是下载的最新的python3.8，如果想安装其他版本，去python官网下载页面下载对应的版本即可。
 但是这个下载链接比较慢，我是用迅雷下载到本地之后，再scp到服务器的。
 
 5. 解压安装
 # 解压压缩包
-tar -zxvf Python-3.8.1.tgz  
+tar -zxvf Python-3.8.3.tgz  
 
 # 进入文件夹
-cd Python-3.8.1
+cd Python-3.8.3
 
 # 配置安装位置
 ./configure prefix=/usr/local/python3
