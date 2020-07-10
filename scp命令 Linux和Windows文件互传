@@ -1,0 +1,42 @@
+scp命令 Linux和Windows文件互传
+1.windows上传文件夹到linux服务器：scp -rp e:\scpdata root@10.1.22.5:/root
+
+复制windows本地D:/data目录到远程服务器10.1.22.5的/root目录
+
+-r 递归复制子文件夹内容
+-p 保留原文件修改，访问时间和权限（modes）信息
+
+ 
+
+2.windows上传文件到linux服务器：scp e:\scpdata\1.txt root@10.1.22.5:/root
+
+ 
+
+3.从linux服务器下载文件：scp root@10.1.22.5:/root/1.txt e:\scpdata\
+
+注意：需要本地Windows有bash命令工具
+
+关于windows下的bash命令行工具：
+安装git客户端就自带了mingw64，运行git-bash.exe就可以进入bash命令行
+git windows客户端下载：https://git-scm.com/download/win
+ 
+免密操作：
+客户端步骤
+1）在本地win10系统打开命令行工具
+2）执行命令：ssh-keygen -t rsa
+3）提示输入密码，因为不需要密码，所以不输入直接enter
+4）生成公钥和私钥文件默认放在C:\Users\Administrator.ssh 目录下，文件名分别为id_rsa.pub和id_rsa
+
+服务端步骤
+1）拷贝客户端上的公钥文件id_rsa.pub 到linux服务器的~/.ssh/ 目录下，注意.ssh目录可能是隐藏的
+2）把公钥文件id_rsa.pub的内容写入到authorized_keys文件，如果authorized_keys不存在，则创建。写入命令：cat id_rsa.pub>>authorized_keys
+注意：如果不是root用户登录，需要免签到对应用户目录下：cat /root/id_rsa.pub>>/home/用户名/.ssh/authorized_keys
+
+注意：/home/用户名  目录必须是用户的默认目录，否则免签无效
+
+如果新创建的用户没有.ssh目录和authorized_keys文件，需要手动创建，并设置权限
+
+chomd 700  /home/用户名/.ssh
+chomd 600  /home/用户名/.ssh/authorized_keys
+
+chown -R flow /mnt/flowsystem  (把mnt目录下的flowsystem目录下的所有子文件的拥有者改为flow用户)
