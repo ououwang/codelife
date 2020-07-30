@@ -9,7 +9,7 @@ Linux：CentOS-6.9 x64
 1
 2
 node官网：https://nodejs.org/en/download/
-
+https://nodejs.org/dist/v12.18.3/node-v12.18.3-linux-x64.tar.xz
 
 
 复制下载链接，使用wget命令下载
