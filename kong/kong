@@ -1,0 +1,27 @@
+
+
+
+
+
+=====konga====
+$ git clone https://github.com/pantsel/konga.git
+$ cd konga
+$ cnpm i
+
+cp .env_example .env
+
+.env 内容
+PORT=8090
+NODE_ENV=production
+DB_ADAPTER=postgres
+DB_HOST =127.0.0.1
+DB_PORT =5432
+DB_USER =konga
+DB_DATABASE =konga
+KONGA_LOG_LEVEL=warn
+
+创建迁移
+node ./bin/konga.js  prepare --adapter postgres --uri postgresql://konga:123456@localhost:5432/konga
+启动
+ npm start
+npm run production
