@@ -1,0 +1,23 @@
+How to Install PHP ext-zip extension?
+Symptoms
+Typical error message, meaning that PHP ext-zip extension is missing:
+
+laravel/installer v2.0.1 requires ext-zip * -> the requested PHP extension zip is missing from your system.
+Fix me
+First, get PHP version running on your computer:
+
+php --version
+Then, on Ubuntu, just run this command:
+
+# For php v7.0
+sudo apt-get install php7.0-zip
+ 
+# For php v7.1
+sudo apt-get install php7.1-zip
+ 
+# For php v7.2
+sudo apt-get install php7.2-zip
+On CentOs:
+
+yum install php-pecl-zip
+Done! Hope it helps!
