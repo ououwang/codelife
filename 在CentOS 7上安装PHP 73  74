@@ -1,0 +1,143 @@
+CentOS 7附带PHP版本5.4，该版本已正式EOL一段时间，并且不再受支持。
+
+通过使用PHP 7，您的应用程序将加载得更快，并消耗更少的系统资源。
+
+在本教程中，我们将说明如何安装或升级到PHP 7.0。在CentOS 7系统上的7.1、7.2和7.3。我们还将向您展示如何将PHP与Nginx和Apache集成。
+
+此外，在安装特定的PHP 7.x版本之前，请确保您的应用程序支持该版本。
+
+先决条件
+在开始本教程之前，请确保您使用具有sudo特权的用户帐户或root用户登录到服务器。最佳实践是以sudo用户而不是root用户身份运行管理命令。如果您的系统上没有sudo用户，则可以按照这些说明创建一个用户。
+
+启用Remi存储库
+PHP 7.x软件包可在几个不同的存储库中使用。我们将使用 Remi存储库，其中提供了包括PHP在内的各种软件包的较新版本。
+
+Remi存储库取决于 EPEL存储库。运行以下命令以启用EPEL和Remi存储库：
+
+sudo yum install epel-release yum-utils
+sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+Copy
+Yum可能会提示您导入存储库GPG密钥。输入y，然后按Enter。
+
+在以下各节中，我们将介绍如何通过启用适当的Remi存储库来安装PHP7.x。如果您已经在系统上安装了PHP 5.4，则yum将更新PHP软件包。
+
+在CentOS 7上安装PHP 7.3
+PHP 7.3是PHP的最新稳定版本。包括 WordPress ，Drupal，Joomla和Laravel在内的大多数现代PHP框架和应用程序都完全支持PHP 7.3。
+
+执行以下步骤在CentOS 7上安装PHP 7.3。
+
+首先启用PHP 7.3 Remi存储库：
+
+sudo yum-config-manager --enable remi-php73
+Copy
+安装PHP 7.3和一些最常见的PHP模块中的一个：
+
+sudo yum install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
+Copy
+通过键入以下命令，将打印PHP版本，以验证PHP安装：
+
+php -v
+Copy
+PHP 7.3.1 (cli) (built: Jan  8 2019 13:55:51) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.3.1, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.3.1, Copyright (c) 1999-2018, by Zend Technologies
+Copy
+在CentOS 7上安装PHP 7.2
+仅当您要安装与PHP 7.2不兼容的应用程序，例如 Magento 2 时，才使用PHP 7.2。
+
+以下步骤描述了如何安装PHP 7.2 CentOS7。
+
+首先通过运行以下命令来启用PHP 7.2 Remi存储库：
+
+sudo yum-config-manager --enable remi-php72
+Copy
+已启用存储库以安装PHP 7.2和一些最常用的PHP模块：
+
+sudo yum install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
+Copy
+验证PHP安装：
+
+php -v
+Copy
+PHP 7.2.9 (cli) (built: Aug 15 2018 09:19:33) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.2.0, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.2.9, Copyright (c) 1999-2018, by Zend Technologies
+Copy
+在CentOS 7上安装PHP 7.1
+按照以下步骤安装PHP 7.1。
+
+通过键入以下内容来启用PHP 7.1存储库：
+
+sudo yum-config-manager --enable remi-php71
+Copy
+安装PHP 7.1和少数几个常见的PHP模块：
+
+sudo yum install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysql
+Copy
+要验证安装，请运行以下命令，该命令将打印PHP版本：
+
+php -v
+Copy
+PHP 7.1.21 (cli) (built: Aug 15 2018 17:56:55) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.1.0, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.1.21, Copyright (c) 1999-2018, by Zend Technologies
+Copy
+设定PHP 7.x与Apache搭配使用
+如果您将 Apache 用作Web服务器，则只需使用以下命令重新启动Apache服务，您就可以开始了：
+
+sudo systemctl restart httpd
+Copy
+配置PHP 7.x与Nginx一起使用
+与Apache不同，Nginx不具有处理PHP文件的内置支持，因此我们需要安装一个单独的应用程序（如PHP FPM）来处理PHP文件。
+
+要安装PHP FPM软件包，请运行以下命令：
+
+sudo yum install php-fpm
+Copy
+默认情况下，PHP FPM将以用户apache在端口9000上运行。我们将用户更改为nginx，然后从TCP套接字切换为Unix套接字。为此，请编辑以黄色突出显示的行：
+
+/etc/php-fpm.d/www.conf
+
+...
+user = nginx
+...
+group = nginx
+...
+listen = /run/php-fpm/www.sock
+...
+listen.owner = nginx
+listen.group = nginx
+Copy
+确保/var/lib/php目录具有正确的所有权：
+
+chown -R root:nginx /var/lib/php
+Copy
+完成更改后，启用并启动PHP FPM服务：
+
+sudo systemctl enable php-fpm
+sudo systemctl start php-fpm
+Copy
+接下来，编辑Nginx虚拟主机指令并添加以下位置块，以便Nginx可以处理PHP文件：
+
+server {
+
+    # . . . other code
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass unix:/run/php-fpm/www.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+Copy
+要使新配置生效，请重新启动Nginx服务：
+
+sudo systemctl restart nginx
+Copy
+结论
+您已经了解了如何在CentOS服务器上安装PHP 7以及如何配置Web服务器以能够处理PHP文件。
