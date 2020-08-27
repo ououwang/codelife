@@ -1,0 +1,9 @@
+通过inspectdb处理类，可以将现有数据库里的一个或多个或全部数据表生成Django model实体类。
+
+调用命令参数：
+
+　　python manage.py inspectdb –database default tablename1 tablename2 >myApp/models.py
+
+–database default : 要转换的数据库配置别名
+　　–database 对应settings.py文件里的DATABASES数据库配置.
+　　当项目配置了两个以上的数据库才要通过 –database，不加–database参数默认就是指向default的数据库。
