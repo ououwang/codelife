@@ -1,1 +1,4 @@
  docker rm -f `docker ps -a -q`
+ 
+ #docker-compose 如果是自定义名字需要使用-f
+ docker-compose -f docker-compose-custom.yml  
