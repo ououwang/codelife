@@ -2,3 +2,7 @@
  
  #docker-compose 如果是自定义名字需要使用-f
  docker-compose -f docker-compose-custom.yml  
+
+
+ docker-compose  -f .\docker-compose-dev.yml up  --build
+  docker-compose  -f .\docker-compose-dev.yml up -d --build 后台
