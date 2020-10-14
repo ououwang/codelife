@@ -6,3 +6,5 @@
 
  docker-compose  -f .\docker-compose-dev.yml up  --build
   docker-compose  -f .\docker-compose-dev.yml up -d --build 后台
+
+docker rm `docker ps -a | grep "c6fc790de53e" | awk '{print $1}'`
