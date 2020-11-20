@@ -1,0 +1,11 @@
+
+SELECT
+     concat_ws('.',a.table_schema ,a.table_name) ,CONCAT(a.table_schema,'.',a.table_name) ,
+     CONCAT(ROUND(table_rows/1000,4),'KB') AS 'Number of Rows',
+     CONCAT(ROUND(data_length/(1024*1024),4),',') AS 'data_size',
+     CONCAT(ROUND(index_length/(1024*1024),4),'M') AS 'index_size',
+     CONCAT(ROUND((data_length+index_length)/(1024*1024),4),'M') AS'Total'
+FROM
+    information_schema. TABLES a
+WHERE
+   a.table_schema = 'ptgx';
