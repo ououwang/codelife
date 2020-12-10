@@ -8,3 +8,9 @@
   docker-compose  -f .\docker-compose-dev.yml up -d --build 后台
 
 docker rm `docker ps -a | grep "c6fc790de53e" | awk '{print $1}'`
+
+docker rm -f `docker container ls -a | grep imageName | awk '{print $1}'
+
+#copy
+docker cp testtomcat：/usr/local/tomcat/webapps/test/js/test.js /opt
+docker cp /opt/test.js testtomcat：/usr/local/tomcat/webapps/test/js
