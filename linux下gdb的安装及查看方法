@@ -1,0 +1,59 @@
+linux下gdb的安装及查看方法
+
+chengsi101 2018-03-02 16:18:51  44195  收藏 44
+分类专栏： linux 文章标签： linux gdb core
+版权
+ 
+linux下gdb的安装方法
+gdb是Linux环境下的代码调试工具，其安装步骤如下：
+安装
+step1：首先检查系统中有没有安装过，有的话用一下命令卸载gdb旧版本
+
+这里写图片描述
+
+step2：在网址：http://ftp.gnu.org/gnu/gdb下载gdb源码包（这里楼主选的是8.0.1版本）；
+
+或者直接在linux系统中用wget命令下载：wget http://ftp.gnu.org/gnu/gdb/gdb-8.0.1.tar.gz
+
+会下载到当前目录下。
+
+
+
+将源码包放在home目录的Download目录中。
+
+step3：打开Download目录，用tar -zxvf 命令解压缩你下载的源码包
+
+
+
+step4：.用以下命令生成makefile文件 
+1. ./configure
+
+
+
+2.make（这个需要的时间比较长，耐心等待哟~）
+
+
+
+3.sudo make install
+
+
+
+4.查看安装是否成功：gdb -v
+
+
+
+完成！
+
+
+
+查看core文件
+
+产生core文件后，就可以利用命令gdb进行查找。
+
+切换到core文件所在的目录，输入命令：gdb ./test core-test-26795-1519971969
+
+参数一是应用程序的名称，参数二是core文件，展示错误内容，如下图所示：
+
+
+
+（gdb）后输入where，就会看到程序崩溃时堆栈信息（当前函数之前的所有已调用函数的列表（包括当前函数），gdb只显示最近几个）
