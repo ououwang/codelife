@@ -1,0 +1,5 @@
+<p>You'll need to install and configure an actual SOCKS server on the server, such as 
+<a href="http://www.inet.no/dante/">Dante</a>,
+<a href="http://ss5.sourceforge.net/">SS5</a>,
+<a href="http://www.delegate.org/">Delegate</a>
+or <a href="http://socks-relay.sourceforge.net/">Srelay</a>.</p>
