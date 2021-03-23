@@ -10,3 +10,246 @@ or <a href="http://socks-relay.sourceforge.net/">Srelay</a>.</p>
 
 dante
 yum install dante-server
+
+
+知乎的一个教程
+Dante是一个免费的Socks代理服务器，当然，其实开发它的公司，是通过销售扩展Modules以及服务来赚钱的。如果只是需要代理，就不需要那些额外的Modules了(安全/流控之类会做在防火墙上，专业的设备做专业的事)
+
+值得吐槽的是，Dante的官方文档，写的不算糟也不算好，安装部署的内容完全没有找到，但解释配置文件的语义的内容基本完整。安装部署参考了下面两个链接:
+
+在CentOS 7里安装dante socks5
+​
+liujia.anqun.org
+Dante安装配置
+​
+ourob.net
+Dante官方网站上只给了源码和编译好的二进制文件，二进制文件有适配RHEL7的，也就可以用在centOS7上，但是，这些文件下载或者编译后，还需要自己去配置环境变量和启动配置，卸载起来也不容易(编译安装可以通过make uninstall来卸载)，总之，不是很方便
+
+centOS7的标准库中不包含Dante Socks，很蛋疼，我们需要用到GhettoForge库
+
+通过扩展库安装的Dante的版本是1.4.1，虽然不是最新版，但也够用了(最新版也就是1.4.2)
+
+通过yum安装时，会同时安装server和client端
+
+Yum 安装
+添加库
+
+rpm -Uvh http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm
+安装这个库之后，仍然会发现找不到……
+
+# yum search dante-server
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.163.com
+ * epel: mirrors.aliyun.com
+ * extras: mirrors.163.com
+ * updates: mirrors.163.com
+Warning: No matches found for: dante-server
+No matches found
+因为dante-server默认在gf-plus库中，需要手动启用
+
+# yum --enablerepo=gf-plus search dante-server
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.163.com
+ * epel: mirrors.aliyun.com
+ * extras: mirrors.163.com
+ * updates: mirrors.163.com
+============================================== N/S matched: dante-server ===============================================
+dante-server.x86_64 : A Free Socks v4/v5 Server Implementation
+所以，centOS上安装dante就比较麻烦……
+
+# yum --enablerepo=gf-plus install dante-server -y
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.163.com
+ * epel: mirrors.aliyun.com
+ * extras: mirrors.163.com
+ * updates: mirrors.163.com
+Resolving Dependencies
+--> Running transaction check
+---> Package dante-server.x86_64 0:1.4.1-176.9 will be installed
+--> Processing Dependency: dante for package: dante-server-1.4.1-176.9.x86_64
+--> Running transaction check
+---> Package dante.x86_64 0:1.4.1-176.9 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+========================================================================================================================
+ Package                        Arch                     Version                        Repository                 Size
+========================================================================================================================
+Installing:
+ dante-server                   x86_64                   1.4.1-176.9                    gf-plus                   331 k
+Installing for dependencies:
+ dante                          x86_64                   1.4.1-176.9                    gf-plus                   480 k
+
+Transaction Summary
+========================================================================================================================
+Install  1 Package (+1 Dependent package)
+
+Total download size: 811 k
+Installed size: 2.4 M
+Downloading packages:
+warning: /var/cache/yum/x86_64/7/gf-plus/packages/dante-server-1.4.1-176.9.x86_64.rpm: Header V4 RSA/SHA1 Signature, key ID da8b7718: NOKEY
+Public key for dante-server-1.4.1-176.9.x86_64.rpm is not installed
+(1/2): dante-server-1.4.1-176.9.x86_64.rpm                                                       | 331 kB  00:00:12
+(2/2): dante-1.4.1-176.9.x86_64.rpm                                                              | 480 kB  00:00:12
+------------------------------------------------------------------------------------------------------------------------
+Total                                                                                    65 kB/s | 811 kB  00:00:12
+Retrieving key from file:///etc/pki/rpm-gpg/RPM-GPG-KEY-gf.el7
+Importing GPG key 0xDA8B7718:
+ Userid     : "Ghettoforge (el7) <gf@ghettoforge.org>"
+ Fingerprint: b43e a892 86f4 b6fd ff83 fed1 d005 ae31 da8b 7718
+ Package    : gf-release-7-10.gf.el7.noarch (installed)
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-gf.el7
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : dante-1.4.1-176.9.x86_64                                                                             1/2
+  Installing : dante-server-1.4.1-176.9.x86_64                                                                      2/2
+  Verifying  : dante-server-1.4.1-176.9.x86_64                                                                      1/2
+  Verifying  : dante-1.4.1-176.9.x86_64                                                                             2/2
+
+Installed:
+  dante-server.x86_64 0:1.4.1-176.9
+
+Dependency Installed:
+  dante.x86_64 0:1.4.1-176.9
+
+Complete!
+Dante安装后配置
+添加一个用户，专用于Dante Socks使用；
+
+adduser --no-create-home --shell /usr/sbin/nologin dante-socks
+创建下面这个文件夹，通过上述yum源安装的Dante Socks，不知为何不会创建这个目录，但启动的配置文件中，是需要这个目录的，Dante会在目录下创建一个sockd.pid的文件
+
+# mkdir /var/run/sockd
+启动配置文件在这里
+
+# vi /usr/lib/systemd/system/sockd.service
+Dante 配置文件说明
+通过yum安装的Dante Socks会有一个默认的sockd.conf文件，存在/etc目录下
+
+如果你熟悉Dante的配置文件语义，你就不需要这个文件，以防万一，还是先重命名一下
+
+# mv /etc/sockd.conf /etc/sockd.conf.default
+然后我们创建自己的conf文件
+
+# vi /etc/sockd.conf
+P.S. 目录下还有一个socks.conf，是用于Dante Socks的客户端的
+
+Dante 配置文件的规则和语义参考这里，不难的——
+
+https://www.inet.no/dante/doc/1.4.x/config/server.html
+
+配置日志
+我们会需要知道谁，在什么时候，通过Socks，去了哪里，这就需要准确的收集日志
+
+在配置文件的一开始，就先配置好日志记录
+
+errorlog: /var/log/sockd.errlog
+logoutput: /var/log/sockd.log
+logoutput:所跟的路径和文件实际上会存所有的log，包括正常的和error的。
+
+日志还有个debug的选项，但是默认我们不要配，否则会多出很多日志，只有当我们需要去debug的时候，才需要配置它
+
+配置网络
+然后是网络部分，网络部分我们需要绑定Socks服务器的internal和external接口，顾名思义，internal连接内部网络，external连接外部网络；internal和external可以是一个，也可以是两个不同的，也可以是ip地址或者主机名，很灵活
+
+internal: ens192 port = 1080
+external: ens160
+port = 1080是Socks的默认端口，可以修改为别的
+
+配置身份验证
+配置服务器身份
+官方给出的示例如下
+
+#user.privileged: root
+user.notprivileged: dante-socks
+#user.libwrap: libwrap
+这里注释掉了第一行和第三行，因为不需要做验证，前文创建的用户就是为这里准备的，避免Socks服务器是以root用户的权限在运行，这样配过后，哪怕你在root权限下启动Socks服务器，实际上也是dante-socks这个用户
+
+libwrap也是和身份验证相关的,暂时用不到,所以注释掉
+
+由于我部署使用Dante Socks的场景中，有其它设备完成访问控制和授权的事情，所以这里我就不在Dante上太多骚操作了，有兴趣的请参考Dante的官方文档
+
+配置身份验证方式
+嗯，因为不需要验证，所以这里就都是none
+
+一定要配，否则后续的client pass和socks pass策略都是不生效的，只有默认的拒绝策略会生效
+
+clientmethod: none
+socksmethod: none
+配置客户端连接控制
+客户端连接控制
+顾名思义，控制哪些客户端可以连接Dante Socks服务器。默认拒绝所有，所以必须写一条client pass
+
+类似于网络设备上的ACL，它也是按顺序执行的
+
+鉴于我并不需要通过这个东西做访问控制(我有防火墙我当然不用它……)，所以我的写法就很粗犷了
+
+client pass {
+        from: 0.0.0.0/0 to: 0.0.0.0/0
+        log: error
+}
+选项 srchost: nodnsmismatch
+If domain names are used for access control, it might be useful to set the global srchost option to the value nodnsmismatch, which will use a reverse-dns lookup to verify that the IP address actually belongs to the domain. The verification step is off by default. To use this option, Dante must be compiled with libwrap enabled, but as long as the server is not started as root it is not necessary to set user.libwrap
+
+嗯……emmm，一看就很麻烦，不搞不搞……
+
+配置socks连接控制
+顾名思义，socks连接就是控制已经允许连接到Socks服务器的客户端能够链接到哪里去(这个倒是很重要)
+
+当然了，如果你只是想粗暴的放通一切——
+
+socks pass {
+       from: 0.0.0.0/0 to: 0.0.0.0/0
+       command: bindreply udpreply bindreply udpreply
+       log: error connect disconnect iooperation
+}
+当然，这样不安全……所以我会像下面这样写——
+
+socks pass {  
+       from: 10.0.0.0/8 to: 0.0.0.0/0
+       command: bind connect udpassociate
+       log: error connect disconnect iooperation
+}
+socks pass {
+       from: 0.0.0.0/0 to: 10.0.0.0/24
+       command: bindreply udpreply
+       log: error connect disconnect iooperation
+}
+这样写的话，就只有10.0.0.0/24这个网段可以通过Socks服务器访问到外部了
+
+这里为什么要写两条？
+
+因为bind/connect/udpassociate/bindreply/udpreply这些东西有点讲究……
+
+具体来说bind/connect/updassociate对应TCP/UDP发起的连接，bindreply/udpreply对应反向的连接，所以对于正向发起的连接，from地址是内部网段10.0.0.0/24，to则是any，反向连接时则要将它们反过来
+
+当然，这里也可以精细的去控制，某个主机，只能访问某个外部的域名或者主机
+
+一份粗犷的配置示例
+没有认证，没有限制，全通一把梭！
+
+errorlog: /var/log/sockd.errlog
+logoutput: /var/log/sockd.log
+
+user.notprivileged: dante-socks
+
+clientmethod: none
+socksmethod: none
+
+client pass {
+        from: 0.0.0.0/0 to: 0.0.0.0/0
+        log: error
+}
+
+socks pass {
+       from: 0.0.0.0/0 to: 0.0.0.0/0
+       command: bindreply udpreply bindreply udpreply
+       log: error connect disconnect iooperation
+}
+如果你要验证，你想要控制……
