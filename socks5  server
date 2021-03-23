@@ -11,6 +11,9 @@ or <a href="http://socks-relay.sourceforge.net/">Srelay</a>.</p>
 dante
 yum install dante-server
 
+启动目录
+/etc/init.d/danted start
+/usr/sbin/sockd -D -p /var/run/sockd/sockd.pid
 
 知乎的一个教程
 Dante是一个免费的Socks代理服务器，当然，其实开发它的公司，是通过销售扩展Modules以及服务来赚钱的。如果只是需要代理，就不需要那些额外的Modules了(安全/流控之类会做在防火墙上，专业的设备做专业的事)
