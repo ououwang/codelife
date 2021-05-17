@@ -1,1 +1,2 @@
 
+docker run -d -v /home/nginx_proxy/:/etc/nginx/conf.d/  --name proxy-nginx  --net=host --restart=always  ae2feff98a0c
