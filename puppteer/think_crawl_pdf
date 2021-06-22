@@ -1,0 +1,128 @@
+const puppeteer = require('puppeteer');
+var fs = require("fs");
+var path = require('path');
+
+(async () => {
+	const browser = await puppeteer.launch({
+		headless: false,
+		 pipe: true,
+		args: ['--proxy-server=socks5://127.0.0.1:8000',
+			'--headless', '--disable-gpu', '--full-memory-crash-report', '--unlimited-storage',
+               '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+	});
+	
+	
+	var data = fs.readFileSync('thinkblog_link.txt');
+	//var data = fs.readFileSync('a.txt');
+	
+	const data_arr  = data.toString().split("\r\n")
+
+	for (var item in data_arr){
+		
+		//console.log( data_arr[item]);
+		let info_arr = data_arr[item].split("\t")
+		let year = info_arr[0].substring(0,4)
+		
+		let save_path = "./thinkblog_pdf/" + year +"/";
+		dirExists(save_path)
+		let save_filename = info_arr[0] +"-"+info_arr[1]+ '.pdf'
+		save_filename = save_filename.replace(/\/+/g, "or")
+		
+		
+		console.log(save_path + save_filename)
+		
+		if( fs.existsSync(save_path + save_filename)){
+			continue;
+		}	
+		
+		//return;
+		
+		const page = await browser.newPage();
+		await page.goto(info_arr[2],{ waitUntil: 'networkidle0',timeout: 0})
+		//await page.goto('https://')
+		//await page.waitFor('.foo');
+		//await page.waitFor(10000);
+		await page.addStyleTag({ content: '#sidebar-wrapper { display: none} #main { width: 88%} ' })
+		//console.log(await page.content());
+	
+		
+		const readElements =await page.$$(".read-more");
+	
+		for (var i in readElements){
+			await readElements[i].click()
+		}
+		//console.log(readElement)
+		//console.log(readElement.length)
+	
+	
+	
+	//}
+		
+	
+		await page.pdf({
+			path:  save_path + save_filename,
+			format: 'a4'
+		  });
+
+		await page.close();
+		
+	}
+	
+	await browser.close();
+
+
+})().catch(error => {
+    console.error(error);
+    process.exit(1);
+});
+
+async function dirExists(dir){
+    let isExists = await getStat(dir);
+    //如果该路径且不是文件，返回true
+    if(isExists && isExists.isDirectory()){
+        return true;
+    }else if(isExists){     //如果该路径存在但是文件，返回false
+        return false;
+    }
+    //如果该路径不存在
+    let tempDir = path.parse(dir).dir;      //拿到上级路径
+    //递归判断，如果上级目录也不存在，则会代码会在此处继续循环执行，直到目录存在
+    let status = await dirExists(tempDir);
+    let mkdirStatus;
+    if(status){
+        mkdirStatus = await mkdir(dir);
+    }
+    return mkdirStatus;
+}
+/**
+ * 读取路径信息
+ * @param {string} path 路径
+ */
+function getStat(path){
+    return new Promise((resolve, reject) => {
+        fs.stat(path, (err, stats) => {
+            if(err){
+                resolve(false);
+            }else{
+                resolve(stats);
+            }
+        })
+    })
+}
+
+/**
+ * 创建路径
+ * @param {string} dir 路径
+ */
+function mkdir(dir){
+    return new Promise((resolve, reject) => {
+        fs.mkdir(dir, err => {
+            if(err){
+                resolve(false);
+            }else{
+                resolve(true);
+            }
+        })
+    })
+}
+
