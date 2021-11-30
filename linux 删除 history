@@ -1,7 +1,7 @@
 一般我们已知的是history -c 命令，即清除所有历史记录 
 
 部分删除操作：
-1.vim ~/.bash_history 
+1.vim ~/.bash_history     vim ~/.mysql_history 
 该文件即为历史记录存储文件，我们随意修改
 
 2.修改后再次 history 查看，发现并没有变化。原因：缓存 
