@@ -1,3 +1,8 @@
+nmcli connection delete c1d2aef6-95ef-4602-b751-a12bf4ce228c
+删除一个网卡后 dns生效
+
+原帖=======
+
 linux centos7 NetworkManager 命令行网络配置工具 nmcli 简介
 
 whatday  于 2020-05-14 09:47:39 发布  3833  收藏 6
