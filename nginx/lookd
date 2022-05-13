@@ -2,8 +2,8 @@ server {
        listen      443 ssl;
        server_name  0.0.0.0;
 
-       ssl_certificate  cert/goodhouse.lookdoor.com.pem;
-       ssl_certificate_key cert/goodhouse.lookdoor.com.key;
+       ssl_certificate  cert/goodhouse.lookd.com.pem;
+       ssl_certificate_key cert/goodhouse.lookd.com.key;
        ssl_session_cache    shared:SSL:1m;
        ssl_session_timeout 5m;
        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
